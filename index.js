@@ -1,97 +1,154 @@
-const inquirer = require('inquirer');
-const path = require('path');
-const {writeFile} = require('fs/promises');
+const inquirer = require("inquirer");
+const path = require("path");
+const { writeFile } = require("fs/promises");
+const db = require("./db/connection");
 
-inquirer.prompt ([{
-    type: 'list',
-    name: 'job',
-    message: "What would you like to do",
-    choices: ['View All Roles', 
-    'View All Departments', 
-    'View All Employees', 
-    'Add a Department',
-    'Add a Role',
-    'Add an Employee',
-    'Update an Employee Role',
-    'Exit']
-}])
-.then(answers => {
-if(answers.job === 'View All Roles') {
-    inquirer.prompt ([{
-
-    }])
+function promptuser() {
+  inquirer
+    .prompt([
+      {
+        type: "list",
+        name: "job",
+        message: "What would you like to do",
+        choices: [
+          "View All Roles",
+          "View All Departments",
+          "View All Employees",
+          "Add a Department",
+          "Add a Role",
+          "Add an Employee",
+          "Update an Employee Role",
+          "Exit",
+        ],
+      },
+    ])
+    .then((answers) => {
+      switch (answers.job) {
+        case "View All Roles":
+          viewAllRoles();
+          break;
+        case "View All Departments":
+          viewAllDepartments();
+          break;
+        case "View All Employees":
+          viewAllEmployees();
+          break;
+        case "Add a Department":
+          addDepartment();
+          break;
+        case "Add a Role":
+          addRole();
+          break;
+        case "Add an Employee":
+          addEmployee();
+          break;
+        case "Update an Employee":
+          updateEmployee();
+          break;
+        case "Exit":
+          exit();
+          break;
+      }
+    });
 }
-else if(answers.job === 'View All Departments') {
-
+function viewAllRoles() {
+  db.promise()
+    .query("SELECT * FROM roles")
+    .then(([rows]) => {
+      console.table(rows);
+      promptuser();
+    });
 }
-else if(answers.job === 'View All Employees') {
-
+function viewAllDepartments() {
+  db.promise()
+    .query("SELECT * FROM department")
+    .then(([rows]) => {
+      console.table(rows);
+      promptuser();
+    });
 }
-
-else if(answers.job === 'Add a Department') {
-    inquirer.prompt ([{
+function viewAllEmployees() {
+  db.promise()
+    .query("SELECT * FROM employee")
+    .then(([rows]) => {
+      console.table(rows);
+      promptuser();
+    });
+}
+function addDepartment(){
+    inquirer.prompt({
         type: 'input',
-    name: 'department',
-    message: "Enter a new department",
-    }])
-}
+        name: 'department_name',
+        message: 'Enter department name',
 
-else if(answers.job === 'Add a Role') {
-    inquirer.prompt ([{
+    }).then(({
+        department_name
+    })=>{
+        db.promise().query('INSERT INTO department SET ?',{department_name}).then(([rows])=>{
+            if(rows.affectedRows>0){
+                viewAllDepartments();
+            }else{
+                console.info('failed to add department')
+                promptuser();
+            };
+        })
+    })
+}
+async function addRole(){
+    const [departments] = await db.promise().query('SELECT * FROM department')
+    const departmentarray = departments.map(({id,department_name})=>({name:department_name,value:id}))
+    console.log(departmentarray);
+    inquirer.prompt({
         type: 'input',
-    name: 'role',
-    message: "Enter a new role",
+        name: 'title',
+        message: 'Enter job title',
+
+    },{
+      type: 'input',
+        name: 'salary',
+        message: 'Enter salary',
     },
     {
-        type: 'input',
-        name:'salary',
-        message: "Enter the salary for this role",
-    },
-    {
-        type: 'input',
-        name: 'department',
-        message: "Enter the department for this role",
-    }
-])
+      type: 'input',
+        name: 'department_id',
+        message: 'Enter department id',
+    }).then(({title, salary, department_id})=>{
+        db.promise().query('INSERT INTO roles SET ?',{title}).then(([rows]))
+        db.promise().query('INSERT INTO roles SET ?',{salary}).then(([rows]))
+        db.promise().query('INSERT INTO roles SET ?',{department_id}).then(([rows]))
+    })
 }
 
-else if(answers.job === 'Add an Employee') {
-    inquirer.prompt ([{
-        type: 'input',
-    name: 'firstname',
-    message: "Enter the employee's first name",
-     
-    },
-    {
-        type: 'input',
-        name: 'lastname',
-        message: "Enter the employee's last name",
-    },
-    {
-        type: 'input',
-        name: 'role',
-        message: "Enter the employee's role",
-    },
-    {
-        type: 'input',
-        name:'manager',
-        message: "Enter the employee's manager",
-    },])
+async function addEmployee(){
+  const [roles] = await db.promise().query('SELECT * FROM roles')
+  const rolearray = roles.map(({id,title})=>({name:title,value:id}))
+  console.log(rolearray)
+  inquirer.prompt({
+    type: 'input',
+    name: 'first_name',
+    message: 'Enter first name',
 
-}
-
-else if(answers.job === 'Update an Employee Role') {
-inquirer.prompt ([{
-    type: 'list',
-    name: 'job',
-    message: "What would you like to do",
-    choices: []
-
-}])
-}
-
-else if(answers.job === 'Exit') {
-db.end();
-}
-
+},{
+  type: 'input',
+    name: 'last_name',
+    message: 'Enter last name',
+},
+{
+  type: 'input',
+    name: 'role_id',
+    message: 'Enter role id',
+},
+{
+  type: 'input',
+  name: 'manager_id',
+  message: 'Enter manager id',
+}).then(({first_name,last_name,role_id,manager_id})=>{
+    db.promise().query('INSERT INTO employee SET ?',{first_name}).then(([rows]))
+    db.promise().query('INSERT INTO employee SET ?',{last_name}).then(([rows]))
+    db.promise().query('INSERT INTO employee SET ?',{role_id}).then(([rows]))
+    db.promise().query('INSERT INTO employee SET ?',{manager_id}).then(([rows]))
 })
+}
+
+
+promptuser();

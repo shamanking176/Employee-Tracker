@@ -1,19 +1,27 @@
 {
-    "name": "main",
-    "version": "1.0.0",
-    "main": "server.js",
-    "scripts": {
-      "test": "echo \"Error: no test specified\" && exit 1",
-      "start": "node server.js"
-    },
-    "keywords": [],
-    "author": "",
-    "license": "ISC",
-    "description": "",
-    "dependencies": {
-      "express": "^4.17.1",
-      "inquirer": "^8.2.4",
-      "easy-table": "1.1.0",
-      "mysql2": "^2.2.5"
-    }
+  "name": "employee-tracker",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shamanking176/Employee-Tracker.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/shamanking176/Employee-Tracker/issues"
+  },
+  "homepage": "https://github.com/shamanking176/Employee-Tracker#readme",
+  "dependencies": {
+    "console.table": "^0.10.0",
+    "dotenv": "^16.0.3",
+    "inquirer": "^8.2.4",
+    "mysql2": "^3.2.3"
   }
+}
