@@ -98,7 +98,7 @@ async function addRole(){
     const [departments] = await db.promise().query('SELECT * FROM department')
     const departmentarray = departments.map(({id,department_name})=>({name:department_name,value:id}))
     console.log(departmentarray);
-    inquirer.prompt({
+    inquirer.prompt([{
         type: 'input',
         name: 'title',
         message: 'Enter job title',
@@ -112,10 +112,15 @@ async function addRole(){
       type: 'input',
         name: 'department_id',
         message: 'Enter department id',
-    }).then(({title, salary, department_id})=>{
-        db.promise().query('INSERT INTO roles SET ?',{title}).then(([rows]))
-        db.promise().query('INSERT INTO roles SET ?',{salary}).then(([rows]))
-        db.promise().query('INSERT INTO roles SET ?',{department_id}).then(([rows]))
+    }]).then(({title, salary, department_id})=>{
+        db.promise().query('INSERT INTO roles SET ?',{
+          title: title,
+          salary: salary,
+          department_id: department_id
+        }).then(([rows])=>{
+          console.table(rows)
+          promptuser();
+        })
     })
 }
 
@@ -123,7 +128,7 @@ async function addEmployee(){
   const [roles] = await db.promise().query('SELECT * FROM roles')
   const rolearray = roles.map(({id,title})=>({name:title,value:id}))
   console.log(rolearray)
-  inquirer.prompt({
+  inquirer.prompt([{
     type: 'input',
     name: 'first_name',
     message: 'Enter first name',
@@ -142,13 +147,23 @@ async function addEmployee(){
   type: 'input',
   name: 'manager_id',
   message: 'Enter manager id',
-}).then(({first_name,last_name,role_id,manager_id})=>{
-    db.promise().query('INSERT INTO employee SET ?',{first_name}).then(([rows]))
-    db.promise().query('INSERT INTO employee SET ?',{last_name}).then(([rows]))
-    db.promise().query('INSERT INTO employee SET ?',{role_id}).then(([rows]))
-    db.promise().query('INSERT INTO employee SET ?',{manager_id}).then(([rows]))
+}]).then(({first_name,last_name,role_id,manager_id})=>{
+    db.promise().query('INSERT INTO employee SET ?',{
+      first_name: first_name,
+      last_name: last_name,
+      role_id: role_id,
+      manager_id: manager_id
+    }).then(([rows])=>{
+      console.table(rows)
+      promptuser();
+    })
+   
 })
 }
 
+function updateEmployee (){
+
+
+}
 
 promptuser();
