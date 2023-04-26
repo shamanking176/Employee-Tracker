@@ -42,7 +42,7 @@ function promptuser() {
         case "Add an Employee":
           addEmployee();
           break;
-        case "Update an Employee":
+        case "Update an Employee Role":
           updateEmployee();
           break;
         case "Exit":
@@ -161,9 +161,31 @@ async function addEmployee(){
 })
 }
 
-function updateEmployee (){
 
+async function updateEmployee (){
+  inquirer.prompt([{
+  type: 'input',
+  name: 'employee_id',
+  message: 'Enter employee id',
 
+},{
+type: 'input',
+  name: 'role_id',
+  message: 'Enter role id',
+},
+]).then(({employee_id,role_id})=>{
+  db.promise().query(`UPDATE employee SET role_id = ${role_id} WHERE employee.id = ${employee_id}`,{
+    employee_id: employee_id,
+    role_id: role_id
+  }).then(([rows])=>{
+    console.table(rows)
+    promptuser();
+  })
+})
+}
+
+function exit(){
+  process.exit(0)
 }
 
 promptuser();
